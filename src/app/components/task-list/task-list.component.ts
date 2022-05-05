@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
 import { TasksState, ArchiveTask, PinTask } from '../../state/task.state';
 import { Task } from '../../models/task.model';
@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./task-list.component.css']
 })
 export class TaskListComponent {
+  @Input() public tasks
   @Select(TasksState.getAllTasks) tasks$: Observable<Task[]>;
 
   constructor(private store: Store) {}

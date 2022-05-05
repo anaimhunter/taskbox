@@ -22,7 +22,8 @@ export class PureTaskListComponent {
   // tslint:disable-next-line: no-output-on-prefix
   @Output()
   onArchiveTask = new EventEmitter<Event>();
-
+  
+  @Input()
   set tasks(arr: Task[]) {
     this.tasksInOrder = [
       ...arr.filter(t => t.state === 'TASK_PINNED'),
