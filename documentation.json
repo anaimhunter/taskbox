@@ -38,11 +38,68 @@
     "injectables": [],
     "classes": [
         {
-            "name": "ArchiveTask",
-            "id": "class-ArchiveTask-f55d87409046d61820454d6158e9d0c3",
+            "name": "AppError",
+            "id": "class-AppError-9c36a39db3f3db5385e17ba4a8097057",
             "file": "src/app/state/task.state.ts",
             "type": "class",
-            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n}",
+            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class AppError {\r\n  static readonly type = actions.ERROR;\r\n  constructor(public payload: boolean) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n  error: boolean;\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n    error: false,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  @Selector()\r\n  static getError(state: TaskStateModel) {\r\n    const { error } = state;\r\n    return error;\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n\r\n  @Action(AppError)\r\n  setAppError({ patchState, getState }: StateContext<TaskStateModel>, { payload }: AppError) {\r\n    const state = getState();\r\n    patchState({\r\n      error: !state.error,\r\n    });\r\n  }\r\n}",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "payload",
+                        "type": "boolean"
+                    }
+                ],
+                "line": 24,
+                "jsdoctags": [
+                    {
+                        "name": "payload",
+                        "type": "boolean",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [
+                {
+                    "name": "payload",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 25,
+                    "modifierKind": [
+                        114
+                    ]
+                },
+                {
+                    "name": "type",
+                    "defaultValue": "actions.ERROR",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 24,
+                    "modifierKind": [
+                        115,
+                        132
+                    ]
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "ArchiveTask",
+            "id": "class-ArchiveTask-9c36a39db3f3db5385e17ba4a8097057",
+            "file": "src/app/state/task.state.ts",
+            "type": "class",
+            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class AppError {\r\n  static readonly type = actions.ERROR;\r\n  constructor(public payload: boolean) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n  error: boolean;\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n    error: false,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  @Selector()\r\n  static getError(state: TaskStateModel) {\r\n    const { error } = state;\r\n    return error;\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n\r\n  @Action(AppError)\r\n  setAppError({ patchState, getState }: StateContext<TaskStateModel>, { payload }: AppError) {\r\n    const state = getState();\r\n    patchState({\r\n      error: !state.error,\r\n    });\r\n  }\r\n}",
             "constructorObj": {
                 "name": "constructor",
                 "description": "",
@@ -52,7 +109,7 @@
                         "type": "string"
                     }
                 ],
-                "line": 11,
+                "line": 12,
                 "jsdoctags": [
                     {
                         "name": "payload",
@@ -69,7 +126,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 13,
+                    "line": 14,
                     "modifierKind": [
                         114
                     ]
@@ -80,7 +137,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 11,
+                    "line": 12,
                     "modifierKind": [
                         115,
                         132
@@ -96,10 +153,10 @@
         },
         {
             "name": "PinTask",
-            "id": "class-PinTask-f55d87409046d61820454d6158e9d0c3",
+            "id": "class-PinTask-9c36a39db3f3db5385e17ba4a8097057",
             "file": "src/app/state/task.state.ts",
             "type": "class",
-            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n}",
+            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class AppError {\r\n  static readonly type = actions.ERROR;\r\n  constructor(public payload: boolean) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n  error: boolean;\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n    error: false,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  @Selector()\r\n  static getError(state: TaskStateModel) {\r\n    const { error } = state;\r\n    return error;\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n\r\n  @Action(AppError)\r\n  setAppError({ patchState, getState }: StateContext<TaskStateModel>, { payload }: AppError) {\r\n    const state = getState();\r\n    patchState({\r\n      error: !state.error,\r\n    });\r\n  }\r\n}",
             "constructorObj": {
                 "name": "constructor",
                 "description": "",
@@ -109,7 +166,7 @@
                         "type": "string"
                     }
                 ],
-                "line": 17,
+                "line": 18,
                 "jsdoctags": [
                     {
                         "name": "payload",
@@ -126,7 +183,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 19,
+                    "line": 20,
                     "modifierKind": [
                         114
                     ]
@@ -137,7 +194,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 17,
+                    "line": 18,
                     "modifierKind": [
                         115,
                         132
@@ -153,10 +210,10 @@
         },
         {
             "name": "TasksState",
-            "id": "class-TasksState-f55d87409046d61820454d6158e9d0c3",
+            "id": "class-TasksState-9c36a39db3f3db5385e17ba4a8097057",
             "file": "src/app/state/task.state.ts",
             "type": "class",
-            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n}",
+            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class AppError {\r\n  static readonly type = actions.ERROR;\r\n  constructor(public payload: boolean) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n  error: boolean;\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n    error: false,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  @Selector()\r\n  static getError(state: TaskStateModel) {\r\n    const { error } = state;\r\n    return error;\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n\r\n  @Action(AppError)\r\n  setAppError({ patchState, getState }: StateContext<TaskStateModel>, { payload }: AppError) {\r\n    const state = getState();\r\n    patchState({\r\n      error: !state.error,\r\n    });\r\n  }\r\n}",
             "properties": [],
             "methods": [
                 {
@@ -172,7 +229,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 65,
+                    "line": 79,
                     "decorators": [
                         {
                             "name": "Action",
@@ -205,7 +262,38 @@
                     "optional": false,
                     "returnType": "any",
                     "typeParameters": [],
-                    "line": 44,
+                    "line": 52,
+                    "decorators": [
+                        {
+                            "name": "Selector",
+                            "stringifiedArguments": ""
+                        }
+                    ],
+                    "modifierKind": [
+                        115
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "state",
+                            "type": "TaskStateModel",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getError",
+                    "args": [
+                        {
+                            "name": "state",
+                            "type": "TaskStateModel"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "boolean",
+                    "typeParameters": [],
+                    "line": 58,
                     "decorators": [
                         {
                             "name": "Selector",
@@ -238,7 +326,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 51,
+                    "line": 65,
                     "decorators": [
                         {
                             "name": "Action",
@@ -259,23 +347,65 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "setAppError",
+                    "args": [
+                        {
+                            "type": "StateContext<TaskStateModel>"
+                        },
+                        {
+                            "type": "AppError"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 93,
+                    "decorators": [
+                        {
+                            "name": "Action",
+                            "stringifiedArguments": "AppError"
+                        }
+                    ],
+                    "jsdoctags": [
+                        {
+                            "type": "StateContext<TaskStateModel>",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "type": "AppError",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
                 }
             ],
             "indexSignatures": []
         },
         {
             "name": "TaskStateModel",
-            "id": "class-TaskStateModel-f55d87409046d61820454d6158e9d0c3",
+            "id": "class-TaskStateModel-9c36a39db3f3db5385e17ba4a8097057",
             "file": "src/app/state/task.state.ts",
             "type": "class",
-            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n}",
+            "sourceCode": "import { State, Selector, Action, StateContext } from '@ngxs/store';\r\nimport { Task } from '../models/task.model';\r\n\r\n// Defines the actions available to the app\r\nexport const actions = {\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n};\r\n\r\nexport class ArchiveTask {\r\n  static readonly type = actions.ARCHIVE_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class PinTask {\r\n  static readonly type = actions.PIN_TASK;\r\n\r\n  constructor(public payload: string) {}\r\n}\r\n\r\nexport class AppError {\r\n  static readonly type = actions.ERROR;\r\n  constructor(public payload: boolean) {}\r\n}\r\n\r\n// The initial state of our store when the app loads.\r\n// Usually you would fetch this from a server\r\nconst defaultTasks = {\r\n  1: { id: '1', title: 'Something', state: 'TASK_INBOX' },\r\n  2: { id: '2', title: 'Something more', state: 'TASK_INBOX' },\r\n  3: { id: '3', title: 'Something else', state: 'TASK_INBOX' },\r\n  4: { id: '4', title: 'Something again', state: 'TASK_INBOX' },\r\n};\r\n\r\nexport class TaskStateModel {\r\n  entities: { [id: number]: Task };\r\n  error: boolean;\r\n}\r\n\r\n// Sets the default state\r\n@State<TaskStateModel>({\r\n  name: 'tasks',\r\n  defaults: {\r\n    entities: defaultTasks,\r\n    error: false,\r\n  },\r\n})\r\nexport class TasksState {\r\n  @Selector()\r\n  static getAllTasks(state: TaskStateModel) {\r\n    const entities = state.entities;\r\n    return Object.keys(entities).map(id => entities[+id]);\r\n  }\r\n\r\n  @Selector()\r\n  static getError(state: TaskStateModel) {\r\n    const { error } = state;\r\n    return error;\r\n  }\r\n\r\n  // Triggers the PinTask action, similar to redux\r\n  @Action(PinTask)\r\n  pinTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: PinTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_PINNED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n  // Triggers the archiveTask action, similar to redux\r\n  @Action(ArchiveTask)\r\n  archiveTask({ patchState, getState }: StateContext<TaskStateModel>, { payload }: ArchiveTask) {\r\n    const state = getState().entities;\r\n\r\n    const entities = {\r\n      ...state,\r\n      [payload]: { ...state[payload], state: 'TASK_ARCHIVED' },\r\n    };\r\n\r\n    patchState({\r\n      entities,\r\n    });\r\n  }\r\n\r\n  @Action(AppError)\r\n  setAppError({ patchState, getState }: StateContext<TaskStateModel>, { payload }: AppError) {\r\n    const state = getState();\r\n    patchState({\r\n      error: !state.error,\r\n    });\r\n  }\r\n}",
             "properties": [
                 {
                     "name": "entities",
                     "type": "literal type",
                     "optional": false,
                     "description": "",
-                    "line": 32
+                    "line": 38
+                },
+                {
+                    "name": "error",
+                    "type": "boolean",
+                    "optional": false,
+                    "description": "",
+                    "line": 39
                 }
             ],
             "methods": [],
@@ -290,7 +420,7 @@
     "components": [
         {
             "name": "AppComponent",
-            "id": "component-AppComponent-3d9f0945d4aee910549f15414861a510",
+            "id": "component-AppComponent-7d6eb3e35025a8773b9d6b376ab02654",
             "file": "src/app/app.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -311,7 +441,7 @@
             "propertiesClass": [
                 {
                     "name": "title",
-                    "defaultValue": "'intro-storybook-angular-template'",
+                    "defaultValue": "'taskbox'",
                     "type": "string",
                     "optional": false,
                     "description": "",
@@ -324,7 +454,7 @@
             "description": "",
             "rawdescription": "",
             "type": "component",
-            "sourceCode": "import { Component } from '@angular/core';\n\n@Component({\n  selector: 'app-root',\n  templateUrl: './app.component.html',\n  styleUrls: ['./app.component.css']\n})\nexport class AppComponent {\n  title = 'intro-storybook-angular-template';\n}\n",
+            "sourceCode": "import { Component } from '@angular/core';\n\n@Component({\n  selector: 'app-root',\n  templateUrl: './app.component.html',\n  styleUrls: ['./app.component.css']\n})\nexport class AppComponent {\n  title = 'taskbox';\n}\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -333,7 +463,7 @@
                 }
             ],
             "stylesData": "",
-            "templateData": "<div class=\"content\" role=\"main\">\n  <br>\n  <br>\n  <app-task></app-task>\n  <br>\n  <br>\n  <app-task-list></app-task-list>\n</div>"
+            "templateData": "<div class=\"content\" role=\"main\">\n  <app-inbox-screen></app-inbox-screen>\n</div>"
         },
         {
             "name": "ButtonComponent",
@@ -479,6 +609,58 @@
             "stylesData": ""
         },
         {
+            "name": "InboxScreenComponent",
+            "id": "component-InboxScreenComponent-234b1e04a9fdb1387232156cdc7613b0",
+            "file": "src/app/components/inbox-screen/inbox-screen.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-inbox-screen",
+            "styleUrls": [
+                "./inbox-screen.component.css"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./inbox-screen.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "error$",
+                    "type": "Observable<any>",
+                    "optional": false,
+                    "description": "",
+                    "line": 12,
+                    "decorators": [
+                        {
+                            "name": "Select",
+                            "stringifiedArguments": "TasksState.getError"
+                        }
+                    ]
+                }
+            ],
+            "methodsClass": [],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component } from '@angular/core';\nimport { Select } from '@ngxs/store';\nimport { TasksState } from '../../state/task.state';\n\nimport { Observable } from 'rxjs';\n@Component({\n  selector: 'app-inbox-screen',\n  templateUrl: './inbox-screen.component.html',\n  styleUrls: ['./inbox-screen.component.css']\n})\nexport class InboxScreenComponent {\n  @Select(TasksState.getError) error$: Observable<any>;\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": "",
+                    "styleUrl": "./inbox-screen.component.css"
+                }
+            ],
+            "stylesData": "",
+            "templateData": "<app-pure-inbox-screen [error]=\"error$ | async\"></app-pure-inbox-screen>\n"
+        },
+        {
             "name": "PageComponent",
             "id": "component-PageComponent-cca1a8911321fa17756ce90c90de65cc",
             "file": "src/stories/page.component.ts",
@@ -539,6 +721,50 @@
                 }
             ],
             "stylesData": ""
+        },
+        {
+            "name": "PureInboxScreenComponent",
+            "id": "component-PureInboxScreenComponent-a23dd3328fb334df44bbf2a1d2b62774",
+            "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-pure-inbox-screen",
+            "styleUrls": [
+                "./pure-inbox-screen.component.css"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./pure-inbox-screen.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [
+                {
+                    "name": "error",
+                    "line": 10,
+                    "type": "any"
+                }
+            ],
+            "outputsClass": [],
+            "propertiesClass": [],
+            "methodsClass": [],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component, Input } from '@angular/core';\n\n\n@Component({\n  selector: 'app-pure-inbox-screen',\n  templateUrl: './pure-inbox-screen.component.html',\n  styleUrls: ['./pure-inbox-screen.component.css']\n})\nexport class PureInboxScreenComponent {\n  @Input() error: any;\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": "",
+                    "styleUrl": "./pure-inbox-screen.component.css"
+                }
+            ],
+            "stylesData": "",
+            "templateData": "<div *ngIf=\"error\" class=\"page lists-show\">\n    <div class=\"wrapper-message\">\n      <span class=\"icon-face-sad\"></span>\n      <div class=\"title-message\">Oh no!</div>\n      <div class=\"subtitle-message\">Something went wrong</div>\n    </div>\n  </div>\n\n  <div *ngIf=\"!error\" class=\"page lists-show\">\n    <nav>\n      <h1 class=\"title-page\">\n        <span class=\"title-wrapper\">Taskbox</span>\n      </h1>\n    </nav>\n    <app-task-list></app-task-list>\n  </div>"
         },
         {
             "name": "PureTaskListComponent",
@@ -870,6 +1096,12 @@
                     "elements": [
                         {
                             "name": "AppComponent"
+                        },
+                        {
+                            "name": "InboxScreenComponent"
+                        },
+                        {
+                            "name": "PureInboxScreenComponent"
                         }
                     ]
                 },
@@ -954,7 +1186,7 @@
                 "subtype": "variable",
                 "file": "src/app/state/task.state.ts",
                 "type": "object",
-                "defaultValue": "{\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n}"
+                "defaultValue": "{\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n}"
             },
             {
                 "name": "actionsData",
@@ -976,7 +1208,7 @@
                 "name": "Default",
                 "ctype": "miscellaneous",
                 "subtype": "variable",
-                "file": "src/app/components/pure-task-list/pure-task-list.stories.ts",
+                "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
                 "type": "",
                 "defaultValue": "Template.bind({})"
             },
@@ -985,6 +1217,14 @@
                 "ctype": "miscellaneous",
                 "subtype": "variable",
                 "file": "src/app/components/task/task.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "Default",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/components/pure-task-list/pure-task-list.stories.ts",
                 "type": "",
                 "defaultValue": "Template.bind({})"
             },
@@ -1019,6 +1259,14 @@
                 "file": "src/environments/environment.ts",
                 "type": "object",
                 "defaultValue": "{\n  production: false\n}"
+            },
+            {
+                "name": "Error",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
             },
             {
                 "name": "Large",
@@ -1136,9 +1384,9 @@
                 "name": "Template",
                 "ctype": "miscellaneous",
                 "subtype": "variable",
-                "file": "src/app/components/pure-task-list/pure-task-list.stories.ts",
+                "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
                 "type": "Story",
-                "defaultValue": "args => ({\r\n  props: {\r\n    ...args,\r\n    onPinTask: TaskStories.actionsData.onPinTask,\r\n    onArchiveTask: TaskStories.actionsData.onArchiveTask,\r\n  },\r\n})"
+                "defaultValue": "args => ({\r\n  props: args,\r\n})"
             },
             {
                 "name": "Template",
@@ -1147,6 +1395,22 @@
                 "file": "src/app/components/task/task.stories.ts",
                 "type": "Story",
                 "defaultValue": "args => ({\r\n  props: {\r\n    ...args,\r\n    onPinTask: actionsData.onPinTask,\r\n    onArchiveTask: actionsData.onArchiveTask,\r\n  },\r\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/components/pure-task-list/pure-task-list.stories.ts",
+                "type": "Story",
+                "defaultValue": "args => ({\r\n  props: {\r\n    ...args,\r\n    onPinTask: TaskStories.actionsData.onPinTask,\r\n    onArchiveTask: TaskStories.actionsData.onArchiveTask,\r\n  },\r\n})"
+            },
+            {
+                "name": "WithInteractions",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
             },
             {
                 "name": "WithPinnedTasks",
@@ -1168,7 +1432,7 @@
                     "subtype": "variable",
                     "file": "src/app/state/task.state.ts",
                     "type": "object",
-                    "defaultValue": "{\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n}"
+                    "defaultValue": "{\r\n  ARCHIVE_TASK: 'ARCHIVE_TASK',\r\n  PIN_TASK: 'PIN_TASK',\r\n  ERROR: 'APP_ERROR',\r\n}"
                 },
                 {
                     "name": "defaultTasks",
@@ -1219,6 +1483,40 @@
                     "file": "src/app/components/task/task.stories.ts",
                     "type": "Story",
                     "defaultValue": "args => ({\r\n  props: {\r\n    ...args,\r\n    onPinTask: actionsData.onPinTask,\r\n    onArchiveTask: actionsData.onArchiveTask,\r\n  },\r\n})"
+                }
+            ],
+            "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts": [
+                {
+                    "name": "Default",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Error",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                    "type": "Story",
+                    "defaultValue": "args => ({\r\n  props: args,\r\n})"
+                },
+                {
+                    "name": "WithInteractions",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
                 }
             ],
             "src/app/components/pure-task-list/pure-task-list.stories.ts": [
@@ -1394,7 +1692,7 @@
     },
     "routes": [],
     "coverage": {
-        "count": 5,
+        "count": 4,
         "status": "low",
         "files": [
             {
@@ -1404,6 +1702,64 @@
                 "name": "AppComponent",
                 "coveragePercent": 0,
                 "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/inbox-screen/inbox-screen.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "InboxScreenComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/pure-inbox-screen/pure-inbox-screen.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "PureInboxScreenComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Default",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Error",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/components/pure-inbox-screen/pure-inbox-screen.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "WithInteractions",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
                 "status": "low"
             },
             {
@@ -1546,6 +1902,15 @@
                 "filePath": "src/app/state/task.state.ts",
                 "type": "class",
                 "linktype": "classe",
+                "name": "AppError",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/state/task.state.ts",
+                "type": "class",
+                "linktype": "classe",
                 "name": "ArchiveTask",
                 "coveragePercent": 0,
                 "coverageCount": "0/4",
@@ -1566,7 +1931,7 @@
                 "linktype": "classe",
                 "name": "TasksState",
                 "coveragePercent": 0,
-                "coverageCount": "0/4",
+                "coverageCount": "0/6",
                 "status": "low"
             },
             {
@@ -1575,7 +1940,7 @@
                 "linktype": "classe",
                 "name": "TaskStateModel",
                 "coveragePercent": 0,
-                "coverageCount": "0/2",
+                "coverageCount": "0/3",
                 "status": "low"
             },
             {
